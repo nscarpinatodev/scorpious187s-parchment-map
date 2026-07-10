@@ -10,6 +10,7 @@ A [Foundry VTT](https://foundryvtt.com) module that opens a map view styled as a
 - **Aged map treatment** — the scene's background image is rendered as faded brown ink on the paper: sepia + hue-unifying colour blend, parchment multiply tint, SVG-noise grain and mottling, and soft-fade masks that melt the map's edges into the sheet.
 - **X marks the spot** — a red ink marker tracks the configured actor's token and re-centres live as it moves.
 - **Pan & zoom** — opens fully zoomed in on the marker; drag to pan, mouse-wheel or corner buttons to zoom, one click to re-centre.
+- **Static scene overlay** — the GM can also pin the parchment into a scene like a tile: it sits at a fixed spot in the world, pans and zooms with the canvas, and updates live as the marked token moves. Players see it as part of the scene and cannot interact with it (clicks pass straight through to the canvas); the GM gets small handles to move, resize, or remove it.
 - **Sensible fallbacks** — with nothing configured, the map shows the currently viewed scene centred on each user's own character.
 - **System-agnostic** — works with any game system.
 
@@ -21,6 +22,14 @@ A [Foundry VTT](https://foundryvtt.com) module that opens a map view styled as a
 
 ```js
 game.modules.get("scorpious187s-parchment-map").api.open();
+```
+
+### Static scene overlay (GM)
+
+To show the map to everyone as part of the scene, click the scroll button in the **Tiles controls** toolbar (GM only). The parchment is placed in the centre of your current view and is immediately visible to all players viewing that scene. Use the handles on the sheet to drag it into position, resize it from the bottom-right grip, or remove it with the ✕; placement is saved on the scene, so it persists and stays where you put it for every client. Clicking the toolbar button again also removes it. Macro equivalent:
+
+```js
+game.modules.get("scorpious187s-parchment-map").api.toggleOverlay();
 ```
 
 ## Compatibility

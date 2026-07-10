@@ -1,6 +1,10 @@
 {
 	"SCORPPARCH.WindowTitle": "Parchment Map",
 	"SCORPPARCH.OpenTool": "Open Parchment Map",
+	"SCORPPARCH.OverlayTool": "Place/Remove Parchment Map Overlay",
+	"SCORPPARCH.Overlay.Move": "Drag to move the map overlay",
+	"SCORPPARCH.Overlay.Resize": "Drag to resize the map overlay",
+	"SCORPPARCH.Overlay.Remove": "Remove the map overlay from this scene",
 	"SCORPPARCH.ZoomIn": "Zoom in",
 	"SCORPPARCH.ZoomOut": "Zoom out",
 	"SCORPPARCH.Recenter": "Recentre",

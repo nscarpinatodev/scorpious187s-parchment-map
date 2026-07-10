@@ -211,6 +211,44 @@
 	box-shadow: 0 1px 4px rgba(60, 36, 12, 0.55);
 }
 
+/* --- scene overlay: the parchment placed in the scene like a tile ----------
+   Rendered into the #hud layer, which shares the canvas world transform, so
+   left/top/width are world coordinates and the sheet pans/zooms with the
+   scene. Players can't interact at all: every pointer event falls through to
+   the canvas. Only the GM's handles opt back in. */
+.pmap-overlay {
+	position: absolute;
+	pointer-events: none;
+}
+.pmap-overlay .pmap-viewport {
+	cursor: default;
+	touch-action: auto;
+}
+/* the window's zoom/recentre buttons make no sense on a static sheet */
+.pmap-overlay .pmap-tools { display: none; }
+
+/* GM-only handles, parchment-styled, the only interactive parts */
+.pmap-overlay-controls {
+	position: absolute;
+	top: 1.5%;
+	right: 5%;
+	display: flex;
+	gap: 4px;
+	z-index: 5;
+	pointer-events: all;
+}
+.pmap-overlay-controls .pmap-tool { pointer-events: all; }
+.pmap-overlay-move { cursor: grab; }
+.pmap-overlay-move:active { cursor: grabbing; }
+.pmap-overlay-resize {
+	position: absolute;
+	right: 5%;
+	bottom: 2%;
+	z-index: 5;
+	pointer-events: all;
+	cursor: nwse-resize;
+}
+
 /* --- empty state: just a faded compass icon on the blank paper ------------- */
 .pmap-empty {
 	position: absolute;

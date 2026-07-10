@@ -1,5 +1,6 @@
 import { MODULE_ID } from "./constants.mjs";
 import { ParchmentMapApp } from "./ParchmentMapApp.mjs";
+import { ParchmentMapOverlay } from "./ParchmentMapOverlay.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -43,5 +44,6 @@ export class ParchmentMapConfig extends HandlebarsApplicationMixin(ApplicationV2
 		await game.settings.set(MODULE_ID, "actorId", d.actorId ?? "");
 		await game.settings.set(MODULE_ID, "zoom", Number(d.zoom) || 8);
 		ParchmentMapApp.refresh();
+		ParchmentMapOverlay.render();
 	}
 }

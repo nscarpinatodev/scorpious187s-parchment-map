@@ -1,6 +1,7 @@
 import { MODULE_ID } from "./constants.mjs";
 import { ParchmentMapApp } from "./ParchmentMapApp.mjs";
 import { ParchmentMapConfig } from "./ParchmentMapConfig.mjs";
+import { ParchmentMapOverlay } from "./ParchmentMapOverlay.mjs";
 
 export { MODULE_ID };
 
@@ -29,21 +30,37 @@ Hooks.once("init", () => {
 	// Expose a small API for macros / other modules.
 	game.modules.get(MODULE_ID).api = {
 		open: () => ParchmentMapApp.open(),
+		toggleOverlay: () => ParchmentMapOverlay.toggle(),
 	};
 });
 
 // Scene-controls launch button (Token controls group, visible to all players).
 Hooks.on("getSceneControlButtons", (controls) => {
 	const tokens = controls.tokens ?? controls.token;
-	if (!tokens?.tools) return;
-	tokens.tools.parchmentMap = {
-		name: "parchmentMap",
-		title: "SCORPPARCH.OpenTool",
-		icon: "fas fa-scroll",
-		button: true,
-		order: Object.keys(tokens.tools).length,
-		onChange: () => ParchmentMapApp.open(),
-	};
+	if (tokens?.tools) {
+		tokens.tools.parchmentMap = {
+			name: "parchmentMap",
+			title: "SCORPPARCH.OpenTool",
+			icon: "fas fa-scroll",
+			button: true,
+			order: Object.keys(tokens.tools).length,
+			onChange: () => ParchmentMapApp.open(),
+		};
+	}
+
+	// GM-only: place/remove the static overlay on the viewed scene. It lives
+	// with the Tiles tools because it behaves like a tile.
+	const tiles = controls.tiles ?? controls.tile;
+	if (game.user.isGM && tiles?.tools) {
+		tiles.tools.parchmentMapOverlay = {
+			name: "parchmentMapOverlay",
+			title: "SCORPPARCH.OverlayTool",
+			icon: "fas fa-scroll",
+			button: true,
+			order: Object.keys(tiles.tools).length,
+			onChange: () => ParchmentMapOverlay.toggle(),
+		};
+	}
 });
 
 // Re-centre the open map when the configured actor's token moves. We don't
@@ -57,6 +74,7 @@ function refreshMapForToken(tokenDoc) {
 	if (tokenDoc.parent?.id !== shownSceneId) return;
 	if (actorId && tokenDoc.actorId !== actorId) return;
 	ParchmentMapApp.refresh();
+	ParchmentMapOverlay.render();
 }
 // `moveToken` fires when a move is committed (destination known immediately);
 // `updateToken` covers non-movement changes and other cores.
@@ -64,8 +82,14 @@ Hooks.on("moveToken", (tokenDoc) => refreshMapForToken(tokenDoc));
 Hooks.on("updateToken", (tokenDoc) => refreshMapForToken(tokenDoc));
 
 // The map may fall back to the viewed scene, so re-render on scene changes.
-Hooks.on("canvasReady", () => ParchmentMapApp.refresh());
+// The overlay also (re)builds here: its placement flag lives on the viewed
+// scene, so canvasReady/updateScene cover both placing and moving it.
+Hooks.on("canvasReady", () => {
+	ParchmentMapApp.refresh();
+	ParchmentMapOverlay.render();
+});
 Hooks.on("updateScene", (scene) => {
 	const sceneId = game.settings.get(MODULE_ID, "sceneId") || canvas?.scene?.id;
 	if (scene.id === sceneId) ParchmentMapApp.refresh();
+	if (scene.id === sceneId || scene.id === canvas?.scene?.id) ParchmentMapOverlay.render();
 });
