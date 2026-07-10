@@ -67,10 +67,11 @@
 	background-size: 100% 100%;
 }
 
-/* Content sits over the flat paper area, inside the torn edges and rolls. */
+/* Content spans nearly the whole sheet; the viewport's fade masks carry the
+   map out to the torn edges and the rolls. */
 .pmap-content {
 	position: absolute;
-	inset: 8.5% 8% 9% 8%;
+	inset: 7% 4.5%;
 }
 
 /* --- the map viewport ------------------------------------------------------ */
@@ -82,12 +83,12 @@
 	touch-action: none;
 	/* soft rectangular fade so the map melts into the surrounding paper */
 	-webkit-mask-image:
-		linear-gradient(90deg, transparent 0, black 9%, black 91%, transparent 100%),
-		linear-gradient(180deg, transparent 0, black 9%, black 91%, transparent 100%);
+		linear-gradient(90deg, transparent 0, black 12%, black 88%, transparent 100%),
+		linear-gradient(180deg, transparent 0, black 12%, black 88%, transparent 100%);
 	-webkit-mask-composite: source-in;
 	mask-image:
-		linear-gradient(90deg, transparent 0, black 9%, black 91%, transparent 100%),
-		linear-gradient(180deg, transparent 0, black 9%, black 91%, transparent 100%);
+		linear-gradient(90deg, transparent 0, black 12%, black 88%, transparent 100%),
+		linear-gradient(180deg, transparent 0, black 12%, black 88%, transparent 100%);
 	mask-composite: intersect;
 }
 .pmap-viewport.dragging { cursor: grabbing; }
