@@ -1,0 +1,337 @@
+/* =========================================================================
+   Scorpious187's Parchment Map
+   The scroll is drawn procedurally: layered gradients for the aged paper,
+   an SVG fractal-noise data-URI for grain, and the #scorp-pmap-rough SVG
+   displacement filter (defined in the template) for the torn edges.
+   ========================================================================= */
+
+.parchment-map {
+	/* ink + paper palette */
+	--pm-ink: #4a2e12;
+	--pm-ink-dim: #7a5a33;
+	--pm-paper: #e7cf9f;
+	--pm-paper-dark: #c9a163;
+	--pm-burn: #8a5a2b;
+	--pm-red: #7a1f1a;
+	/* SVG fractal-noise grain, tiled */
+	--pm-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+	/* low-frequency mottling for water stains / uneven ageing */
+	--pm-blotch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23b)'/%3E%3C/svg%3E");
+}
+
+/* --- window chrome: transparent, so only the scroll shows ---------------- */
+.application.parchment-map {
+	--color-window-background: transparent;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	backdrop-filter: none !important;
+	min-width: 380px;
+	min-height: 520px;
+}
+.application.parchment-map .window-content {
+	padding: 0;
+	background: transparent !important;
+	border: none;
+	box-shadow: none;
+	overflow: visible;
+	color: var(--pm-ink);
+}
+/* Header floats invisibly over the scroll so the window is still
+   drag/closeable but no chrome box shows around the torn edges. */
+.application.parchment-map .window-header {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	position: absolute;
+	inset: 0 0 auto 0;
+	z-index: 10;
+}
+.application.parchment-map .window-header .window-title { visibility: hidden; }
+.application.parchment-map .window-header button {
+	color: var(--pm-ink);
+	text-shadow: 0 0 4px rgba(255, 244, 214, 0.9);
+}
+.application.parchment-map .window-resize-handle { opacity: 0.35; }
+
+/* --- the scroll ----------------------------------------------------------- */
+.pmap-scroll {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
+}
+
+/* the paper sheet, roughened into torn/deckled edges by the SVG filter */
+.pmap-sheet {
+	position: absolute;
+	inset: 20px 10px;
+	filter: url(#scorp-pmap-rough);
+	background:
+		/* scorched corners / edge burn */
+		radial-gradient(120% 90% at 0% 0%, rgba(96, 58, 20, 0.4) 0%, transparent 22%),
+		radial-gradient(120% 90% at 100% 0%, rgba(96, 58, 20, 0.38) 0%, transparent 24%),
+		radial-gradient(120% 90% at 0% 100%, rgba(96, 58, 20, 0.42) 0%, transparent 24%),
+		radial-gradient(120% 90% at 100% 100%, rgba(96, 58, 20, 0.36) 0%, transparent 22%),
+		/* darkened rims all around */
+		linear-gradient(90deg, rgba(122, 78, 33, 0.5) 0%, transparent 6%, transparent 94%, rgba(122, 78, 33, 0.5) 100%),
+		linear-gradient(180deg, rgba(122, 78, 33, 0.45) 0%, transparent 7%, transparent 93%, rgba(122, 78, 33, 0.45) 100%),
+		/* bright centre fading to aged edges */
+		radial-gradient(90% 75% at 50% 42%, #f2e0b4 0%, var(--pm-paper) 45%, #d7b276 78%, var(--pm-paper-dark) 100%);
+}
+/* grain + mottling over the sheet colour */
+.pmap-sheet::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: var(--pm-grain);
+	opacity: 0.16;
+	mix-blend-mode: multiply;
+}
+.pmap-sheet::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: var(--pm-blotch);
+	background-size: 600px 600px;
+	opacity: 0.14;
+	mix-blend-mode: multiply;
+}
+
+/* --- rolled ends ----------------------------------------------------------- */
+.pmap-roll {
+	position: absolute;
+	left: -2px;
+	right: -2px;
+	height: 38px;
+	border-radius: 19px;
+	z-index: 2;
+	background:
+		var(--pm-grain),
+		linear-gradient(180deg,
+			#5c3c1c 0%,
+			#a97c44 14%,
+			#e0bd85 38%,
+			#f0d7a6 50%,
+			#d3a869 66%,
+			#8a5f2e 86%,
+			#4c2f14 100%);
+	background-blend-mode: multiply, normal;
+	box-shadow: 0 5px 9px rgba(40, 22, 6, 0.5);
+}
+.pmap-roll-top { top: 0; }
+.pmap-roll-bottom { bottom: 0; box-shadow: 0 -5px 9px rgba(40, 22, 6, 0.4); }
+
+/* roll end caps: the spiral cross-section of the rolled tube */
+.pmap-roll::before,
+.pmap-roll::after {
+	content: "";
+	position: absolute;
+	top: 1px;
+	width: 34px;
+	height: 36px;
+	border-radius: 50%;
+	background: radial-gradient(circle at 50% 50%,
+		#e6c894 0% 16%,
+		#7a5127 22%,
+		#d8b077 30%,
+		#6b4423 40%,
+		#c9a166 52%,
+		#54351a 68%,
+		#a97c44 82%,
+		#3c2410 100%);
+	box-shadow: 2px 0 5px rgba(30, 16, 4, 0.5);
+}
+.pmap-roll::before { left: -8px; }
+.pmap-roll::after { right: -8px; box-shadow: -2px 0 5px rgba(30, 16, 4, 0.5); }
+
+/* shadows the rolls cast onto the sheet */
+.pmap-content::before,
+.pmap-content::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 26px;
+	pointer-events: none;
+	z-index: 1;
+}
+.pmap-content::before { top: -14px; background: linear-gradient(180deg, rgba(60, 36, 12, 0.42), transparent); }
+.pmap-content::after { bottom: -14px; background: linear-gradient(0deg, rgba(60, 36, 12, 0.42), transparent); }
+
+/* --- content --------------------------------------------------------------- */
+.pmap-content {
+	position: absolute;
+	inset: 52px 36px 48px;
+	z-index: 3;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.pmap-title {
+	text-align: center;
+	flex: 0 0 auto;
+}
+.pmap-scene-name {
+	font-family: "Modesto Condensed", "IM Fell English", "Signika", serif;
+	font-size: 26px;
+	font-weight: 700;
+	letter-spacing: 2px;
+	color: var(--pm-ink);
+	text-shadow: 0 1px 0 rgba(255, 240, 200, 0.6);
+}
+/* flourish under the title */
+.pmap-title::after {
+	content: "";
+	display: block;
+	margin: 2px auto 0;
+	width: 60%;
+	height: 2px;
+	background: linear-gradient(90deg, transparent, var(--pm-ink-dim) 20%, var(--pm-ink) 50%, var(--pm-ink-dim) 80%, transparent);
+	opacity: 0.6;
+}
+
+/* --- the map viewport ------------------------------------------------------ */
+.pmap-viewport {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	cursor: grab;
+	touch-action: none;
+	border-radius: 4px;
+}
+.pmap-viewport.dragging { cursor: grabbing; }
+
+/* the scene image, aged into faded ink */
+.pmap-scene {
+	position: absolute;
+	left: 0;
+	top: 0;
+	max-width: none;
+	user-select: none;
+	filter: sepia(0.55) saturate(0.6) contrast(0.88) brightness(1.06);
+}
+/* parchment-coloured multiply tint: the map looks drawn onto the paper */
+.pmap-ink {
+	position: absolute;
+	inset: 0;
+	background: #d9b578;
+	mix-blend-mode: multiply;
+	opacity: 0.5;
+	pointer-events: none;
+}
+/* paper grain showing through the map */
+.pmap-grain {
+	position: absolute;
+	inset: 0;
+	background-image: var(--pm-grain);
+	mix-blend-mode: multiply;
+	opacity: 0.25;
+	pointer-events: none;
+}
+/* fade the map into the surrounding paper at the edges */
+.pmap-vignette {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: radial-gradient(ellipse at 50% 50%,
+		transparent 52%,
+		rgba(231, 207, 159, 0.25) 72%,
+		rgba(214, 178, 118, 0.6) 90%,
+		rgba(178, 132, 70, 0.85) 100%);
+	box-shadow: inset 0 0 34px 12px rgba(122, 78, 33, 0.45);
+}
+
+/* X-marks-the-spot marker in red ink */
+.pmap-marker {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 20px;
+	height: 20px;
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+	filter: drop-shadow(0 1px 1px rgba(60, 30, 10, 0.5));
+}
+.pmap-marker::before,
+.pmap-marker::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 20px;
+	height: 5px;
+	border-radius: 3px;
+	background: var(--pm-red);
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+.pmap-marker::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.pmap-marker { animation: pmap-throb 2.2s ease-in-out infinite; }
+@keyframes pmap-throb {
+	0%, 100% { transform: translate(-50%, -50%) scale(1); }
+	50% { transform: translate(-50%, -50%) scale(1.18); }
+}
+@media (prefers-reduced-motion: reduce) { .pmap-marker { animation: none; } }
+
+/* zoom / recentre tools, inked onto the top-right corner of the map */
+.pmap-tools {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	z-index: 4;
+}
+.pmap-tool {
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	display: grid;
+	place-items: center;
+	background: rgba(240, 220, 172, 0.85);
+	border: 1px solid var(--pm-ink-dim);
+	border-radius: 5px;
+	color: var(--pm-ink);
+	cursor: pointer;
+	font-size: 12px;
+	box-shadow: 0 1px 3px rgba(60, 36, 12, 0.4);
+}
+.pmap-tool:hover {
+	background: #f6e6bd;
+	border-color: var(--pm-ink);
+	box-shadow: 0 1px 4px rgba(60, 36, 12, 0.55);
+}
+
+/* --- caption / empty state -------------------------------------------------- */
+.pmap-caption {
+	flex: 0 0 auto;
+	text-align: center;
+	font-family: "IM Fell English", "Modesto Condensed", serif;
+	font-style: italic;
+	font-size: 14px;
+	color: var(--pm-ink-dim);
+}
+.pmap-warn { color: #8a3b18; }
+
+.pmap-empty {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	color: var(--pm-ink-dim);
+	text-align: center;
+}
+.pmap-empty i { font-size: 44px; opacity: 0.5; }
+.pmap-empty p {
+	margin: 0;
+	font-family: "Modesto Condensed", serif;
+	font-size: 22px;
+	letter-spacing: 2px;
+	color: var(--pm-ink);
+}
+.pmap-empty-sub { font-size: 13px !important; font-family: "Signika", sans-serif !important; letter-spacing: 0 !important; color: var(--pm-ink-dim) !important; }
