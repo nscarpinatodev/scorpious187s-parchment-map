@@ -1,74 +1,38 @@
 {{!-- Scorpious187's Parchment Map — a scene rendered as an aged map on a
-      rolled parchment scroll. All parchment art is procedural (CSS + the SVG
-      displacement filter below), so no image assets are required. --}}
-
-{{!-- ApplicationV2 template parts must render a single root element, so the
-      SVG filter lives inside the scroll div. --}}
-<div class="pmap-scroll">
-	{{!-- Zero-size SVG defining the torn-edge displacement filter used by the
-	      sheet layers via CSS `filter: url(#scorp-pmap-rough)`. --}}
-	<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-		<defs>
-			<filter id="scorp-pmap-rough" x="-5%" y="-5%" width="110%" height="110%">
-				<feTurbulence type="fractalNoise" baseFrequency="0.012 0.035" numOctaves="4" seed="7" result="noise" />
-				<feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G" />
-			</filter>
-		</defs>
-	</svg>
-
-	{{!-- The paper sheet: gradients + grain, roughened by the SVG filter. --}}
-	<div class="pmap-sheet"></div>
-
-	{{!-- Rolled ends, overlapping the sheet's top and bottom. --}}
-	<div class="pmap-roll pmap-roll-top"></div>
-	<div class="pmap-roll pmap-roll-bottom"></div>
-
-	{{!-- Content sits inset from the torn edges, above the sheet layers. --}}
+      parchment scroll (frames/parchment.png). Text-free: just the map, the
+      marker, and the icon tools. --}}
+<div class="pmap-scroll" style="--pmap-frame-src:url('{{frameSrc}}')">
 	<div class="pmap-content">
 		{{#if available}}
-		<header class="pmap-title">
-			<span class="pmap-scene-name">{{sceneName}}</span>
-		</header>
-
 		<div class="pmap-viewport" data-fx="{{fx}}" data-fy="{{fy}}" data-zoom="{{defaultZoom}}">
-			<img class="pmap-scene" src="{{bgSrc}}" alt="" draggable="false" />
-			<div class="pmap-ink"></div>
-			<div class="pmap-grain"></div>
+			{{!-- The canvas pans/zooms as one unit so the ink/grain treatment
+			      only covers the map itself, never the bare paper around it. --}}
+			<div class="pmap-canvas">
+				<img class="pmap-scene" src="{{bgSrc}}" alt="" draggable="false" />
+				<div class="pmap-ink"></div>
+				<div class="pmap-grain"></div>
+			</div>
 			<div class="pmap-vignette"></div>
 			{{#if hasToken}}<div class="pmap-marker" data-tooltip="{{actorName}}"></div>{{/if}}
-
-			<div class="pmap-tools">
-				<button type="button" class="pmap-tool" data-action="zoomMap" data-dir="1"
-					data-tooltip="{{localize 'SCORPPARCH.ZoomIn'}}">
-					<i class="fas fa-magnifying-glass-plus"></i>
-				</button>
-				<button type="button" class="pmap-tool" data-action="zoomMap" data-dir="-1"
-					data-tooltip="{{localize 'SCORPPARCH.ZoomOut'}}">
-					<i class="fas fa-magnifying-glass-minus"></i>
-				</button>
-				<button type="button" class="pmap-tool" data-action="recenterMap"
-					data-tooltip="{{localize 'SCORPPARCH.Recenter'}}">
-					<i class="fas fa-crosshairs"></i>
-				</button>
-			</div>
 		</div>
 
-		<footer class="pmap-caption">
-			{{#if hasToken}}
-			<span>{{localize 'SCORPPARCH.MarkerLabel'}} {{actorName}}</span>
-			{{else if hasActor}}
-			<span class="pmap-warn">{{actorName}} — {{localize 'SCORPPARCH.NoTokenWarn'}}</span>
-			{{else}}
-			<span class="pmap-warn">{{localize 'SCORPPARCH.NoActorWarn'}}</span>
-			{{/if}}
-		</footer>
+		<div class="pmap-tools">
+			<button type="button" class="pmap-tool" data-action="zoomMap" data-dir="1"
+				data-tooltip="{{localize 'SCORPPARCH.ZoomIn'}}">
+				<i class="fas fa-magnifying-glass-plus"></i>
+			</button>
+			<button type="button" class="pmap-tool" data-action="zoomMap" data-dir="-1"
+				data-tooltip="{{localize 'SCORPPARCH.ZoomOut'}}">
+				<i class="fas fa-magnifying-glass-minus"></i>
+			</button>
+			<button type="button" class="pmap-tool" data-action="recenterMap"
+				data-tooltip="{{localize 'SCORPPARCH.Recenter'}}">
+				<i class="fas fa-crosshairs"></i>
+			</button>
+		</div>
 		{{else}}
-		<div class="pmap-empty">
+		<div class="pmap-empty" data-tooltip="{{localize 'SCORPPARCH.EmptyHint'}}">
 			<i class="fas fa-map-location-dot"></i>
-			<p>{{localize 'SCORPPARCH.WindowTitle'}}</p>
-			<p class="pmap-empty-sub">
-				{{#if isGM}}{{localize 'SCORPPARCH.EmptyGM'}}{{else}}{{localize 'SCORPPARCH.EmptyPlayer'}}{{/if}}
-			</p>
 		</div>
 		{{/if}}
 	</div>

@@ -41,7 +41,7 @@ export class ParchmentMapConfig extends HandlebarsApplicationMixin(ApplicationV2
 		const d = formData.object;
 		await game.settings.set(MODULE_ID, "sceneId", d.sceneId ?? "");
 		await game.settings.set(MODULE_ID, "actorId", d.actorId ?? "");
-		await game.settings.set(MODULE_ID, "zoom", Number(d.zoom) || 1.25);
+		await game.settings.set(MODULE_ID, "zoom", Number(d.zoom) || 8);
 		ParchmentMapApp.refresh();
 	}
 }

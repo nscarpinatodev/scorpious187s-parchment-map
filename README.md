@@ -1,18 +1,17 @@
 # Scorpious187's Parchment Map
 
-A [Foundry VTT](https://foundryvtt.com) module that opens a map view styled as a rolled-up parchment scroll. A GM-configured scene is displayed with an aged-ink parchment treatment — paper grain, water stains, torn edges, rolled ends — centred on a chosen actor's token, marked with a red X.
+A [Foundry VTT](https://foundryvtt.com) module that opens a map view styled as a rolled-up parchment scroll. A GM-configured scene is displayed with a heavy aged-ink parchment treatment, centred on a chosen actor's token, marked with a red X. No text, no chrome — just the map on the scroll.
 
 ![Preview](docs/preview.png)
 
-The entire parchment look is procedural (CSS gradients + SVG turbulence/displacement filters), so the module ships no image assets and works with any game system.
-
 ## Features
 
-- **Parchment scroll window** — frameless, resizable, draggable, with torn deckled edges and rolled top/bottom ends drawn entirely in CSS/SVG.
-- **Aged map treatment** — the scene's background image is rendered as faded ink on the paper: sepia toning, parchment multiply tint, grain, and an edge vignette that blends the map into the sheet.
+- **Parchment scroll window** — a real parchment texture with torn edges and rolled ends; the window chrome is fully transparent, resizable, and draggable.
+- **Aged map treatment** — the scene's background image is rendered as faded brown ink on the paper: sepia + hue-unifying colour blend, parchment multiply tint, SVG-noise grain and mottling, and soft-fade masks that melt the map's edges into the sheet.
 - **X marks the spot** — a red ink marker tracks the configured actor's token and re-centres live as it moves.
-- **Pan & zoom** — drag to pan, mouse-wheel or corner buttons to zoom, one click to re-centre.
+- **Pan & zoom** — opens fully zoomed in on the marker; drag to pan, mouse-wheel or corner buttons to zoom, one click to re-centre.
 - **Sensible fallbacks** — with nothing configured, the map shows the currently viewed scene centred on each user's own character.
+- **System-agnostic** — works with any game system.
 
 ## Usage
 
@@ -36,3 +35,7 @@ Install via manifest URL:
 ```
 https://github.com/nscarpinatodev/scorpious187s-parchment-map/releases/latest/download/module.json
 ```
+
+## Credits
+
+Parchment texture: [Old parchment paper with a rough surface](https://www.vecteezy.com/) via Vecteezy.

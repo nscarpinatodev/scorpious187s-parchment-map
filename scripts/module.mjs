@@ -15,7 +15,7 @@ Hooks.once("init", () => {
 		scope: "world", config: false, type: String, default: "",
 	});
 	game.settings.register(MODULE_ID, "zoom", {
-		scope: "world", config: false, type: Number, default: 1.25,
+		scope: "world", config: false, type: Number, default: 8,
 	});
 	game.settings.registerMenu(MODULE_ID, "parchmentMapConfig", {
 		name: "SCORPPARCH.Config.MenuName",

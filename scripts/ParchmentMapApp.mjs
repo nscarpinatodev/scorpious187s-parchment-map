@@ -22,8 +22,8 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			resizable: true,
 		},
 		position: {
-			width: 560,
-			height: 780,
+			width: 700,
+			height: "auto",
 		},
 		actions: {
 			zoomMap: ParchmentMapApp.#onZoomMap,
@@ -109,7 +109,9 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	async _prepareContext(options) {
 		const context = await super._prepareContext(options);
 		context.moduleId = MODULE_ID;
-		context.isGM = game.user.isGM;
+		// Resolve to a root-absolute URL so the inline-style url() isn't broken
+		// by Foundry's route prefix (a relative url() 404s otherwise).
+		context.frameSrc = foundry.utils.getRoute(`modules/${MODULE_ID}/frames/parchment.png`);
 
 		const scene = this.#resolveScene();
 		const bg = scene?.background?.src ?? scene?.img ?? null;
@@ -127,10 +129,8 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		context.fx = fx;
 		context.fy = fy;
 		context.hasToken = hasToken;
-		context.hasActor = !!actor;
-		context.sceneName = scene.name;
 		context.actorName = actor?.name ?? "";
-		context.defaultZoom = game.settings.get(MODULE_ID, "zoom") || 1.25;
+		context.defaultZoom = game.settings.get(MODULE_ID, "zoom") || 8;
 		return context;
 	}
 
@@ -151,14 +151,15 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	#currentZoom(vp) {
-		return this.#view.zoom ?? (parseFloat(vp.dataset.zoom) || 1.25);
+		return this.#view.zoom ?? (parseFloat(vp.dataset.zoom) || 8);
 	}
 
-	/** Position the map background: centre on the token, then apply pan + zoom. */
+	/** Position the map canvas: centre on the token, then apply pan + zoom. */
 	#layoutMap() {
 		const vp = this.element?.querySelector(".pmap-viewport");
-		const img = vp?.querySelector(".pmap-scene");
-		if (!vp || !img) return;
+		const cv = vp?.querySelector(".pmap-canvas");
+		const img = cv?.querySelector(".pmap-scene");
+		if (!vp || !cv || !img) return;
 
 		const apply = () => {
 			const vw = vp.clientWidth;
@@ -169,10 +170,10 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			const fy = parseFloat(vp.dataset.fy) || 0.5;
 			const dispW = vw * zoom;
 			const dispH = dispW * (img.naturalHeight / img.naturalWidth);
-			img.style.width = `${dispW}px`;
-			img.style.height = `${dispH}px`;
-			img.style.left = `${vw / 2 - fx * dispW + this.#view.panX}px`;
-			img.style.top = `${vh / 2 - fy * dispH + this.#view.panY}px`;
+			cv.style.width = `${dispW}px`;
+			cv.style.height = `${dispH}px`;
+			cv.style.left = `${vw / 2 - fx * dispW + this.#view.panX}px`;
+			cv.style.top = `${vh / 2 - fy * dispH + this.#view.panY}px`;
 
 			// Keep the X-marks-the-spot marker on the token as the view pans/zooms.
 			const marker = vp.querySelector(".pmap-marker");
