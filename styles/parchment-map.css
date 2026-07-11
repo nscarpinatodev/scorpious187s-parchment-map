@@ -62,16 +62,42 @@
 	width: 100%;
 	/* frames/parchment.png native proportions (cropped to the alpha bounds) */
 	aspect-ratio: 2779 / 4176;
+}
+/* The texture lives on its own layer so landscape mode can rotate the paper
+   under the map while the map itself stays upright. */
+.pmap-frame {
+	position: absolute;
+	inset: 0;
 	background-image: var(--pmap-frame-src);
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
+	pointer-events: none;
 }
 
 /* Content spans nearly the whole sheet; the viewport's fade masks carry the
-   map out to the torn edges and the rolls. */
+   map out to the torn edges and the rolls. The rolls sit at the top of the
+   texture (~7%); the bottom is flat paper down to a thin lip (~5%). */
 .pmap-content {
 	position: absolute;
-	inset: 7% 4.5%;
+	inset: 7% 4.5% 5%;
+}
+
+/* --- landscape: the sheet turned 90°, rolls left/right --------------------- */
+.pmap-scroll.landscape { aspect-ratio: 4176 / 2779; }
+/* Swap the frame's box (width = parent height, height = parent width) and
+   rotate it back into place, so the portrait texture fills the wide sheet. */
+.pmap-scroll.landscape .pmap-frame {
+	inset: auto;
+	left: 50%;
+	top: 50%;
+	width: calc(100% * 2779 / 4176);
+	height: calc(100% * 4176 / 2779);
+	transform: translate(-50%, -50%) rotate(90deg);
+}
+/* rotate(90deg) puts the texture's top (big rolls) on the right and its
+   bottom lip on the left; the torn sides become top/bottom. */
+.pmap-scroll.landscape .pmap-content {
+	inset: 4.5% 7% 4.5% 5%;
 }
 
 /* --- the map viewport ------------------------------------------------------ */

@@ -29,6 +29,7 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		actions: {
 			zoomMap: ParchmentMapApp.#onZoomMap,
 			recenterMap: ParchmentMapApp.#onRecenterMap,
+			rotateMap: ParchmentMapApp.#onRotateMap,
 		},
 	};
 
@@ -76,7 +77,9 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	async _prepareContext(options) {
 		const context = await super._prepareContext(options);
-		return Object.assign(context, prepareMapContext());
+		Object.assign(context, prepareMapContext());
+		context.landscape = game.settings.get(MODULE_ID, "landscape");
+		return context;
 	}
 
 	/* -------------------------------------------- */
@@ -164,5 +167,14 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	static #onRecenterMap() {
 		this.#view = { zoom: null, panX: 0, panY: 0 };
 		this.#layoutMap();
+	}
+
+	static async #onRotateMap() {
+		await game.settings.set(MODULE_ID, "landscape",
+			!game.settings.get(MODULE_ID, "landscape"));
+		await this.render();
+		// The scroll's aspect ratio just flipped; re-fit the auto height so the
+		// window doesn't keep the old orientation's box.
+		this.setPosition({ height: "auto" });
 	}
 }

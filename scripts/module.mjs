@@ -18,6 +18,11 @@ Hooks.once("init", () => {
 	game.settings.register(MODULE_ID, "zoom", {
 		scope: "world", config: false, type: Number, default: 8,
 	});
+	// Per-user orientation of the map window (the overlay's orientation is
+	// GM-placed and lives in the scene flag instead).
+	game.settings.register(MODULE_ID, "landscape", {
+		scope: "client", config: false, type: Boolean, default: false,
+	});
 	game.settings.registerMenu(MODULE_ID, "parchmentMapConfig", {
 		name: "SCORPPARCH.Config.MenuName",
 		label: "SCORPPARCH.Config.MenuLabel",
@@ -31,6 +36,7 @@ Hooks.once("init", () => {
 	game.modules.get(MODULE_ID).api = {
 		open: () => ParchmentMapApp.open(),
 		toggleOverlay: () => ParchmentMapOverlay.toggle(),
+		rotateOverlay: () => ParchmentMapOverlay.rotate(),
 	};
 });
 

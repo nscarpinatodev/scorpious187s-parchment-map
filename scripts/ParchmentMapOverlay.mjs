@@ -19,7 +19,7 @@ export class ParchmentMapOverlay {
 	/** Minimum overlay width in world pixels. */
 	static #MIN_WIDTH = 120;
 
-	/** Placement flag ({x, y, width} in world coordinates) on the viewed scene. */
+	/** Placement flag ({x, y, width, landscape}, world coords) on the viewed scene. */
 	static get placement() {
 		return canvas?.scene?.getFlag(MODULE_ID, "overlay") ?? null;
 	}
@@ -51,6 +51,17 @@ export class ParchmentMapOverlay {
 			x: Math.round(x - width / 2),
 			y: Math.round(y - (width * FRAME_ASPECT) / 2),
 			width,
+			landscape: false,
+		});
+	}
+
+	/** GM: flip the placed overlay between portrait and landscape. */
+	static async rotate() {
+		const placement = this.placement;
+		if (!placement || !game.user.isGM) return;
+		await canvas.scene?.setFlag(MODULE_ID, "overlay", {
+			...placement,
+			landscape: !placement.landscape,
 		});
 	}
 
@@ -65,6 +76,7 @@ export class ParchmentMapOverlay {
 		if (!placement || !hud) return;
 
 		const context = prepareMapContext();
+		context.landscape = !!placement.landscape;
 		const html = await foundry.applications.handlebars.renderTemplate(
 			`modules/${MODULE_ID}/templates/parchment-map.hbs`, context,
 		);
@@ -82,11 +94,11 @@ export class ParchmentMapOverlay {
 	}
 
 	/** Position/size the element in world coordinates (the HUD scales them). */
-	static #applyPlacement(el, { x, y, width }) {
+	static #applyPlacement(el, { x, y, width, landscape }) {
 		el.style.left = `${x}px`;
 		el.style.top = `${y}px`;
 		el.style.width = `${width}px`;
-		el.style.height = `${width * FRAME_ASPECT}px`;
+		el.style.height = `${landscape ? width / FRAME_ASPECT : width * FRAME_ASPECT}px`;
 	}
 
 	/* -------------------------------------------- */
@@ -103,6 +115,13 @@ export class ParchmentMapOverlay {
 		move.dataset.tooltip = game.i18n.localize("SCORPPARCH.Overlay.Move");
 		move.innerHTML = '<i class="fas fa-arrows-up-down-left-right"></i>';
 
+		const rotate = document.createElement("button");
+		rotate.type = "button";
+		rotate.className = "pmap-tool pmap-overlay-rotate";
+		rotate.dataset.tooltip = game.i18n.localize("SCORPPARCH.Overlay.Rotate");
+		rotate.innerHTML = '<i class="fas fa-rotate-right"></i>';
+		rotate.addEventListener("click", () => this.rotate());
+
 		const remove = document.createElement("button");
 		remove.type = "button";
 		remove.className = "pmap-tool pmap-overlay-remove";
@@ -110,7 +129,7 @@ export class ParchmentMapOverlay {
 		remove.innerHTML = '<i class="fas fa-xmark"></i>';
 		remove.addEventListener("click", () => this.toggle());
 
-		controls.append(move, remove);
+		controls.append(move, rotate, remove);
 		el.appendChild(controls);
 
 		const resize = document.createElement("button");
@@ -139,6 +158,7 @@ export class ParchmentMapOverlay {
 				x: parseFloat(el.style.left) || 0,
 				y: parseFloat(el.style.top) || 0,
 				width: parseFloat(el.style.width) || this.#MIN_WIDTH,
+				landscape: !!this.placement?.landscape,
 			};
 
 			const onMove = (ev) => {
@@ -158,6 +178,7 @@ export class ParchmentMapOverlay {
 					x: Math.round(parseFloat(el.style.left) || 0),
 					y: Math.round(parseFloat(el.style.top) || 0),
 					width: Math.round(parseFloat(el.style.width) || this.#MIN_WIDTH),
+					landscape: start.landscape,
 				});
 			};
 			window.addEventListener("pointermove", onMove);

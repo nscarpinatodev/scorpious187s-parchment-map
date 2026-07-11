@@ -1,7 +1,9 @@
 {{!-- Scorpious187's Parchment Map — a scene rendered as an aged map on a
       parchment scroll (frames/parchment.png). Text-free: just the map, the
-      marker, and the icon tools. --}}
-<div class="pmap-scroll" style="--pmap-frame-src:url('{{frameSrc}}')">
+      marker, and the icon tools. In landscape mode the frame texture rotates
+      90° under the map (rolls left/right) while the map stays upright. --}}
+<div class="pmap-scroll{{#if landscape}} landscape{{/if}}" style="--pmap-frame-src:url('{{frameSrc}}')">
+	<div class="pmap-frame"></div>
 	<div class="pmap-content">
 		{{#if available}}
 		<div class="pmap-viewport" data-fx="{{fx}}" data-fy="{{fy}}" data-zoom="{{defaultZoom}}">
@@ -28,6 +30,10 @@
 			<button type="button" class="pmap-tool" data-action="recenterMap"
 				data-tooltip="{{localize 'SCORPPARCH.Recenter'}}">
 				<i class="fas fa-crosshairs"></i>
+			</button>
+			<button type="button" class="pmap-tool" data-action="rotateMap"
+				data-tooltip="{{localize 'SCORPPARCH.Rotate'}}">
+				<i class="fas fa-rotate-right"></i>
 			</button>
 		</div>
 		{{else}}
