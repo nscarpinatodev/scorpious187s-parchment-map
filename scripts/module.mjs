@@ -2,6 +2,7 @@ import { MODULE_ID } from "./constants.mjs";
 import { ParchmentMapApp } from "./ParchmentMapApp.mjs";
 import { ParchmentMapConfig } from "./ParchmentMapConfig.mjs";
 import { ParchmentMapOverlay } from "./ParchmentMapOverlay.mjs";
+import { ParchmentMapCanvas } from "./ParchmentMapCanvas.mjs";
 
 export { MODULE_ID };
 
@@ -41,6 +42,9 @@ Hooks.once("init", () => {
 		open: () => ParchmentMapApp.open(),
 		toggleOverlay: () => ParchmentMapOverlay.toggle(),
 		rotateOverlay: () => ParchmentMapOverlay.rotate(),
+		// v15 canvas render engine (experimental / WIP)
+		placeCanvasMap: () => ParchmentMapCanvas.place(),
+		removeCanvasMap: () => ParchmentMapCanvas.remove(),
 	};
 });
 
@@ -70,8 +74,26 @@ Hooks.on("getSceneControlButtons", (controls) => {
 			order: Object.keys(tiles.tools).length,
 			onChange: () => ParchmentMapOverlay.toggle(),
 		};
+		// v15 canvas render engine (experimental): place a real map Tile.
+		tiles.tools.parchmentMapCanvas = {
+			name: "parchmentMapCanvas",
+			title: "SCORPPARCH.CanvasTool",
+			icon: "fas fa-vector-square",
+			button: true,
+			order: Object.keys(tiles.tools).length + 1,
+			onChange: () => ParchmentMapCanvas.place(),
+		};
 	}
 });
+
+// --- v15 canvas render engine hooks (experimental) ----------------------
+// Repaint our flagged tile's live texture whenever it (re)draws, and free the
+// GPU texture when it's deleted.
+Hooks.on("drawTile", (tileObj) => ParchmentMapCanvas.paint(tileObj));
+// Foundry resets the mesh texture on refresh/redraw; re-point it to our live
+// texture (cheap) so the tile doesn't blank out during drags or over time.
+Hooks.on("refreshTile", (tileObj) => ParchmentMapCanvas.reassert(tileObj));
+Hooks.on("deleteTile", (tileDoc) => ParchmentMapCanvas.releaseTile(tileDoc.id));
 
 // Re-centre the open map when the configured actor's token moves. We don't
 // gate on `x`/`y` in the change set — v13/v14 commits token movement in ways
@@ -85,6 +107,7 @@ function refreshMapForToken(tokenDoc) {
 	if (actorId && tokenDoc.actorId !== actorId) return;
 	ParchmentMapApp.refresh();
 	ParchmentMapOverlay.render();
+	ParchmentMapCanvas.refresh();
 }
 // `moveToken` fires when a move is committed (destination known immediately);
 // `updateToken` covers non-movement changes and other cores.
@@ -112,7 +135,13 @@ Hooks.on("renderTileConfig", (app, html) => {
 	const anchor = element.querySelector("footer, .form-footer");
 	if (anchor) anchor.before(group);
 	else element.querySelector("form")?.appendChild(group);
-	app.setPosition?.({ height: "auto" });
+	// Defer + guard: v14's tile config throws if setPosition runs before the
+	// element is laid out (TilePalette._updatePosition reads offsetWidth of null).
+	requestAnimationFrame(() => {
+		try {
+			if (app.element?.isConnected) app.setPosition?.({ height: "auto" });
+		} catch (_e) { /* non-fatal */ }
+	});
 });
 
 // Tagged tiles draw on the map, so tile changes on the shown scene refresh it.
@@ -123,7 +152,14 @@ function refreshMapForTile(tileDoc) {
 	ParchmentMapOverlay.render();
 }
 Hooks.on("createTile", (tileDoc) => refreshMapForTile(tileDoc));
-Hooks.on("updateTile", (tileDoc) => refreshMapForTile(tileDoc));
+Hooks.on("updateTile", (tileDoc) => {
+	refreshMapForTile(tileDoc);
+	// Our own map tile repaints when it's moved/resized (drawTile won't fire).
+	if (tileDoc.getFlag(MODULE_ID, "canvasMap")) {
+		const obj = canvas.tiles?.get(tileDoc.id);
+		if (obj) ParchmentMapCanvas.paint(obj);
+	}
+});
 Hooks.on("deleteTile", (tileDoc) => refreshMapForTile(tileDoc));
 
 // World settings (theme, scene, actor, zoom) sync to every client; refresh
@@ -140,6 +176,7 @@ Hooks.on("updateSetting", (setting) => {
 Hooks.on("canvasReady", () => {
 	ParchmentMapApp.refresh();
 	ParchmentMapOverlay.render();
+	ParchmentMapCanvas.refresh();
 });
 Hooks.on("updateScene", (scene) => {
 	const sceneId = game.settings.get(MODULE_ID, "sceneId") || canvas?.scene?.id;
