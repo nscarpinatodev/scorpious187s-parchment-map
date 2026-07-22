@@ -1,8 +1,8 @@
-{{!-- Scorpious187's Parchment Map — a scene rendered as an aged map on a
-      parchment scroll (frames/parchment.png). Text-free: just the map, the
-      marker, and the icon tools. In landscape mode the frame texture rotates
-      90° under the map (rolls left/right) while the map stays upright. --}}
-<div class="pmap-scroll{{#if landscape}} landscape{{/if}}" style="--pmap-frame-src:url('{{frameSrc}}')">
+{{!-- Scorpious187's Parchment Map — a scene rendered inside a themed frame
+      (aged parchment scroll, sci-fi tablet, ...). Text-free: just the map,
+      the marker, and the icon tools. In the rotated orientation the frame
+      texture turns 90° under the map while the map stays upright. --}}
+<div class="pmap-scroll {{themeClass}}{{#if rotated}} rotated{{/if}}" style="{{scrollStyle}}">
 	<div class="pmap-frame"></div>
 	<div class="pmap-content">
 		{{#if available}}
@@ -11,6 +11,10 @@
 			      only covers the map itself, never the bare paper around it. --}}
 			<div class="pmap-canvas">
 				<img class="pmap-scene" src="{{bgSrc}}" alt="" draggable="false" />
+				{{#each tiles}}
+				<img class="pmap-tile" src="{{src}}" alt="" draggable="false"
+					style="left:{{left}}%;top:{{top}}%;width:{{width}}%;height:{{height}}%;opacity:{{alpha}};{{#if rotation}}transform:rotate({{rotation}}deg);transform-origin:{{originX}}% {{originY}}%;{{/if}}" />
+				{{/each}}
 				<div class="pmap-ink"></div>
 				<div class="pmap-grain"></div>
 			</div>
@@ -35,6 +39,10 @@
 				data-tooltip="{{localize 'SCORPPARCH.Rotate'}}">
 				<i class="fas fa-rotate-right"></i>
 			</button>
+			<button type="button" class="pmap-tool" data-action="closeMap"
+				data-tooltip="{{localize 'SCORPPARCH.Close'}}">
+				<i class="fas fa-power-off"></i>
+			</button>
 		</div>
 		{{else}}
 		<div class="pmap-empty" data-tooltip="{{localize 'SCORPPARCH.EmptyHint'}}">
@@ -42,4 +50,5 @@
 		</div>
 		{{/if}}
 	</div>
+	{{#if hasFront}}<div class="pmap-frame-front"></div>{{/if}}
 </div>

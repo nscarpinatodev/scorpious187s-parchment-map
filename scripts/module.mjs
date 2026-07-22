@@ -23,6 +23,10 @@ Hooks.once("init", () => {
 	game.settings.register(MODULE_ID, "landscape", {
 		scope: "client", config: false, type: Boolean, default: false,
 	});
+	// Frame theme (parchment scroll, sci-fi tablet, ...), world-wide.
+	game.settings.register(MODULE_ID, "theme", {
+		scope: "world", config: false, type: String, default: "parchment",
+	});
 	game.settings.registerMenu(MODULE_ID, "parchmentMapConfig", {
 		name: "SCORPPARCH.Config.MenuName",
 		label: "SCORPPARCH.Config.MenuLabel",
@@ -86,6 +90,49 @@ function refreshMapForToken(tokenDoc) {
 // `updateToken` covers non-movement changes and other cores.
 Hooks.on("moveToken", (tokenDoc) => refreshMapForToken(tokenDoc));
 Hooks.on("updateToken", (tokenDoc) => refreshMapForToken(tokenDoc));
+
+// "Show on in-game map" checkbox in the Tile configuration sheet. The input
+// is named into our flag scope, so Foundry's form handling saves it with the
+// rest of the tile — no custom submit logic needed.
+Hooks.on("renderTileConfig", (app, html) => {
+	const element = html instanceof HTMLElement ? html : html?.[0];
+	const doc = app.document ?? app.object;
+	if (!element || !doc) return;
+	const flagName = `flags.${MODULE_ID}.showOnMap`;
+	if (element.querySelector(`[name="${flagName}"]`)) return;
+	const checked = doc.getFlag(MODULE_ID, "showOnMap") ? "checked" : "";
+	const group = document.createElement("div");
+	group.className = "form-group";
+	group.innerHTML = `
+		<label>${game.i18n.localize("SCORPPARCH.TileShowOnMap")}</label>
+		<div class="form-fields">
+			<input type="checkbox" name="${flagName}" ${checked} />
+		</div>
+		<p class="hint">${game.i18n.localize("SCORPPARCH.TileShowOnMapHint")}</p>`;
+	const anchor = element.querySelector("footer, .form-footer");
+	if (anchor) anchor.before(group);
+	else element.querySelector("form")?.appendChild(group);
+	app.setPosition?.({ height: "auto" });
+});
+
+// Tagged tiles draw on the map, so tile changes on the shown scene refresh it.
+function refreshMapForTile(tileDoc) {
+	const shownSceneId = game.settings.get(MODULE_ID, "sceneId") || canvas?.scene?.id;
+	if (tileDoc.parent?.id !== shownSceneId) return;
+	ParchmentMapApp.refresh();
+	ParchmentMapOverlay.render();
+}
+Hooks.on("createTile", (tileDoc) => refreshMapForTile(tileDoc));
+Hooks.on("updateTile", (tileDoc) => refreshMapForTile(tileDoc));
+Hooks.on("deleteTile", (tileDoc) => refreshMapForTile(tileDoc));
+
+// World settings (theme, scene, actor, zoom) sync to every client; refresh
+// the open displays when any of ours changes.
+Hooks.on("updateSetting", (setting) => {
+	if (!setting.key?.startsWith(`${MODULE_ID}.`)) return;
+	ParchmentMapApp.refresh();
+	ParchmentMapOverlay.render();
+});
 
 // The map may fall back to the viewed scene, so re-render on scene changes.
 // The overlay also (re)builds here: its placement flag lives on the viewed

@@ -56,16 +56,21 @@
 }
 .application.parchment-map .window-resize-handle { opacity: 0.35; }
 
-/* --- the scroll: the parchment texture is the whole frame ----------------- */
+/* --- the frame: theme-driven via CSS vars set inline by the template -------
+   --pmap-ar         native width/height of the frame artwork
+   --pmap-frame-src  the frame texture (back plate)
+   --pmap-front-src  optional plate drawn over the map (overhanging bezels)
+   --pmap-inset      .pmap-content inset in the native orientation
+   --pmap-inset-rot  .pmap-content inset when rotated 90° */
 .pmap-scroll {
 	position: relative;
 	width: 100%;
-	/* frames/parchment.png native proportions (cropped to the alpha bounds) */
-	aspect-ratio: 2779 / 4176;
+	aspect-ratio: var(--pmap-ar);
 }
-/* The texture lives on its own layer so landscape mode can rotate the paper
-   under the map while the map itself stays upright. */
-.pmap-frame {
+/* The texture lives on its own layer so the rotated orientation can turn the
+   artwork under the map while the map itself stays upright. */
+.pmap-frame,
+.pmap-frame-front {
 	position: absolute;
 	inset: 0;
 	background-image: var(--pmap-frame-src);
@@ -73,31 +78,28 @@
 	background-size: 100% 100%;
 	pointer-events: none;
 }
+.pmap-frame-front { background-image: var(--pmap-front-src); }
 
-/* Content spans nearly the whole sheet; the viewport's fade masks carry the
-   map out to the torn edges and the rolls. The rolls sit at the top of the
-   texture (~7%); the bottom is flat paper down to a thin lip (~5%). */
 .pmap-content {
 	position: absolute;
-	inset: 7% 4.5% 5%;
+	inset: var(--pmap-inset);
 }
 
-/* --- landscape: the sheet turned 90°, rolls left/right --------------------- */
-.pmap-scroll.landscape { aspect-ratio: 4176 / 2779; }
+/* --- rotated: the frame turned 90° under an upright map -------------------- */
+.pmap-scroll.rotated { aspect-ratio: calc(1 / var(--pmap-ar)); }
 /* Swap the frame's box (width = parent height, height = parent width) and
-   rotate it back into place, so the portrait texture fills the wide sheet. */
-.pmap-scroll.landscape .pmap-frame {
+   rotate it back into place, so the native texture fills the turned sheet. */
+.pmap-scroll.rotated .pmap-frame,
+.pmap-scroll.rotated .pmap-frame-front {
 	inset: auto;
 	left: 50%;
 	top: 50%;
-	width: calc(100% * 2779 / 4176);
-	height: calc(100% * 4176 / 2779);
+	width: calc(100% * var(--pmap-ar));
+	height: calc(100% / var(--pmap-ar));
 	transform: translate(-50%, -50%) rotate(90deg);
 }
-/* rotate(90deg) puts the texture's top (big rolls) on the right and its
-   bottom lip on the left; the torn sides become top/bottom. */
-.pmap-scroll.landscape .pmap-content {
-	inset: 4.5% 7% 4.5% 5%;
+.pmap-scroll.rotated .pmap-content {
+	inset: var(--pmap-inset-rot);
 }
 
 /* --- the map viewport ------------------------------------------------------ */
@@ -141,7 +143,17 @@
 	height: 100%;
 	max-width: none;
 	user-select: none;
+}
+.pmap-scene,
+.pmap-tile {
 	filter: sepia(1) hue-rotate(-8deg) saturate(0.55) contrast(0.85) brightness(1.1);
+}
+/* GM-tagged scene tiles, drawn onto the map in scene coordinates */
+.pmap-tile {
+	position: absolute;
+	max-width: none;
+	user-select: none;
+	pointer-events: none;
 }
 /* hue unifier: forces every map colour towards brown ink on parchment */
 .pmap-ink {
@@ -236,6 +248,147 @@
 	border-color: var(--pm-ink);
 	box-shadow: 0 1px 4px rgba(60, 36, 12, 0.55);
 }
+
+/* ===== sci-fi tablet theme: cold holo-display instead of aged ink ==========
+   The default rules above are the parchment treatment; these override them
+   when the scroll carries .theme-scifi. */
+.theme-scifi {
+	/* holo palette for tools, marker and empty state */
+	--pm-ink: #46e6cf;
+	--pm-ink-dim: #1d6c60;
+	--pm-red: #ff3d33;
+}
+.theme-scifi .pmap-scene,
+.theme-scifi .pmap-tile {
+	filter: grayscale(1) brightness(1.08) contrast(1.08);
+}
+/* hue unifier: everything towards teal hologram light */
+.theme-scifi .pmap-ink {
+	background: #2fe4c8;
+	mix-blend-mode: color;
+	opacity: 0.9;
+}
+/* paper grain becomes scanlines with a faint noise shimmer */
+.theme-scifi .pmap-grain {
+	background-color: #123f39;
+	background-image: repeating-linear-gradient(180deg,
+		rgba(0, 0, 0, 0.32) 0px,
+		rgba(0, 0, 0, 0.32) 1px,
+		transparent 1px,
+		transparent 3px), var(--pm-grain);
+	background-size: auto, 240px 240px;
+	mix-blend-mode: multiply;
+	opacity: 0.5;
+}
+/* cool glow centre, dark display edges */
+.theme-scifi .pmap-vignette {
+	background: radial-gradient(ellipse at 50% 45%,
+		rgba(120, 255, 235, 0.10) 0%,
+		transparent 45%,
+		rgba(4, 30, 27, 0.55) 82%,
+		rgba(2, 18, 16, 0.85) 100%);
+	box-shadow: inset 0 0 46px 14px rgba(2, 22, 20, 0.6);
+}
+/* A display is hard-edged: drop the paper fade masks, and clip the map to
+   the screen's shape (it has a 45° cut at its lower-left corner). */
+.theme-scifi .pmap-viewport {
+	-webkit-mask-image: none;
+	mask-image: none;
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 9.1% 100%, 0 86.2%);
+}
+.theme-scifi.rotated .pmap-viewport {
+	clip-path: polygon(13.8% 0, 100% 0, 100% 100%, 0 100%, 0 9.1%);
+}
+.theme-scifi .pmap-canvas {
+	-webkit-mask-image: none;
+	mask-image: none;
+}
+/* the inked X becomes a targeting reticle: ring + centre dot + cross lines */
+.theme-scifi .pmap-marker {
+	width: 22px;
+	height: 22px;
+	box-sizing: border-box;
+	border: 2px solid var(--pm-red);
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--pm-red) 0 2px, transparent 2.5px);
+	filter: drop-shadow(0 0 3px rgba(255, 61, 51, 0.7));
+}
+.theme-scifi .pmap-marker::before,
+.theme-scifi .pmap-marker::after {
+	width: 30px;
+	height: 2px;
+	border-radius: 1px;
+	transform: translate(-50%, -50%);
+}
+.theme-scifi .pmap-marker::after {
+	transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.theme-scifi .pmap-tool {
+	background: rgba(6, 24, 22, 0.85);
+	border-color: var(--pm-ink-dim);
+	color: var(--pm-ink);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.theme-scifi .pmap-tool:hover {
+	background: rgba(10, 40, 36, 0.95);
+	border-color: var(--pm-ink);
+	box-shadow: 0 0 6px rgba(70, 230, 207, 0.5);
+}
+
+/* Tool buttons pinned individually to the frame artwork; cqw sizing keeps
+   their spot on the artwork identical at every window size. Layout designed
+   in the button-placement mockup. */
+.theme-scifi { container-type: inline-size; }
+.theme-scifi .pmap-tools {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+.theme-scifi .pmap-tool {
+	position: absolute;
+	pointer-events: all;
+	box-sizing: border-box;
+	width: 3cqw;
+	height: 3cqw;
+	border-radius: 0.45cqw;
+	/* icon sits comfortably inside the square rather than overflowing it */
+	font-size: 2cqw;
+}
+/* Off: clear round white-on-red button over the frame's LED */
+.theme-scifi .pmap-tool:nth-child(5) {
+	width: 3.1cqw;
+	height: 3.1cqw;
+	background: transparent;
+	border: none;
+	border-radius: 50%;
+	box-shadow: none;
+	color: #ffffff;
+	font-size: 2.1cqw;
+	text-shadow: 0 0 0.25cqw rgba(255, 61, 51, 0.7);
+}
+.theme-scifi .pmap-tool:nth-child(5):hover {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	text-shadow: 0 0 0.4cqw rgba(255, 61, 51, 1);
+}
+
+/* Landscape layout — the frame's native orientation. */
+.theme-scifi .pmap-tool:nth-child(1) { top: -1.5%; left: 2.3%; }   /* Zoom in */
+.theme-scifi .pmap-tool:nth-child(2) { top: 6.3%; left: 2.3%; }    /* Zoom out */
+.theme-scifi .pmap-tool:nth-child(3) { top: 17.3%; left: 0.6%; }   /* Recentre */
+.theme-scifi .pmap-tool:nth-child(4) { top: 12.7%; left: -1.3%; }  /* Rotate */
+.theme-scifi .pmap-tool:nth-child(5) { top: 94.7%; left: 96.8%; }  /* Off */
+
+/* Portrait (rotated) layout — the frame is turned 90°, so the brackets move
+   and the buttons need their own positions. Higher specificity than the
+   landscape rules above, so these win whenever .rotated is present. */
+.theme-scifi.rotated .pmap-tool:nth-child(1) { top: 0.3%; left: 93.3%; }   /* Zoom in */
+.theme-scifi.rotated .pmap-tool:nth-child(2) { top: 5.3%; left: 93.4%; }   /* Zoom out */
+.theme-scifi.rotated .pmap-tool:nth-child(3) { top: 1.1%; left: 78.7%; }   /* Recentre */
+.theme-scifi.rotated .pmap-tool:nth-child(4) { top: -0.7%; left: 83.2%; }  /* Rotate */
+.theme-scifi.rotated .pmap-tool:nth-child(5) { top: 97.2%; left: 0.5%; }   /* Off */
 
 /* --- scene overlay: the parchment placed in the scene like a tile ----------
    Rendered into the #hud layer, which shares the canvas world transform, so

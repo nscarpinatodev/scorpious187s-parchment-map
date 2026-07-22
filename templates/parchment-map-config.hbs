@@ -2,6 +2,18 @@
 	<p class="hint">{{localize 'SCORPPARCH.Config.Hint'}}</p>
 
 	<div class="form-group">
+		<label>{{localize 'SCORPPARCH.Config.Theme'}}</label>
+		<div class="form-fields">
+			<select name="theme">
+				{{#each themes}}
+				<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+				{{/each}}
+			</select>
+		</div>
+		<p class="hint">{{localize 'SCORPPARCH.Config.ThemeHint'}}</p>
+	</div>
+
+	<div class="form-group">
 		<label>{{localize 'SCORPPARCH.Config.Scene'}}</label>
 		<div class="form-fields">
 			<select name="sceneId">

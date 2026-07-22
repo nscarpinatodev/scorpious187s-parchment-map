@@ -30,6 +30,7 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			zoomMap: ParchmentMapApp.#onZoomMap,
 			recenterMap: ParchmentMapApp.#onRecenterMap,
 			rotateMap: ParchmentMapApp.#onRotateMap,
+			closeMap: ParchmentMapApp.#onCloseMap,
 		},
 	};
 
@@ -77,9 +78,9 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	async _prepareContext(options) {
 		const context = await super._prepareContext(options);
-		Object.assign(context, prepareMapContext());
-		context.landscape = game.settings.get(MODULE_ID, "landscape");
-		return context;
+		return Object.assign(context, prepareMapContext({
+			landscape: game.settings.get(MODULE_ID, "landscape"),
+		}));
 	}
 
 	/* -------------------------------------------- */
@@ -167,6 +168,10 @@ export class ParchmentMapApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	static #onRecenterMap() {
 		this.#view = { zoom: null, panX: 0, panY: 0 };
 		this.#layoutMap();
+	}
+
+	static #onCloseMap() {
+		this.close();
 	}
 
 	static async #onRotateMap() {

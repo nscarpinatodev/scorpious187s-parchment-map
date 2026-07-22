@@ -1,6 +1,8 @@
-# Scorpious187's Parchment Map
+# Scorpious187's In-Game Maps
 
-A [Foundry VTT](https://foundryvtt.com) module that opens a map view styled as a rolled-up parchment scroll. A GM-configured scene is displayed with a heavy aged-ink parchment treatment, centred on a chosen actor's token, marked with a red X. No text, no chrome — just the map on the scroll.
+A [Foundry VTT](https://foundryvtt.com) module that displays a scene as an in-game map inside a themed frame — a rolled-up parchment scroll with a heavy aged-ink treatment, or a sci-fi holo-tablet. The map is centred on a chosen actor's token, marked in red. No text, no chrome — just the map in its frame, as a window or pinned into a scene like a tile.
+
+> Formerly "Scorpious187's Parchment Map" — the module id is unchanged, so existing installs update normally.
 
 ![Preview](docs/preview.png)
 
@@ -11,6 +13,8 @@ A [Foundry VTT](https://foundryvtt.com) module that opens a map view styled as a
 - **X marks the spot** — a red ink marker tracks the configured actor's token and re-centres live as it moves.
 - **Pan & zoom** — opens fully zoomed in on the marker; drag to pan, mouse-wheel or corner buttons to zoom, one click to re-centre.
 - **Static scene overlay** — the GM can also pin the parchment into a scene like a tile: it sits at a fixed spot in the world, pans and zooms with the canvas, and updates live as the marked token moves. Players see it as part of the scene and cannot interact with it (clicks pass straight through to the canvas); the GM gets small handles to move, resize, or remove it.
+- **Tagged tiles** — tick "Show on In-Game Map" in any tile's configuration to draw it on the map at its scene position (rotation, opacity and stacking respected), with the active theme's treatment applied. Handy for hand-placed landmarks, labels, or fog shapes that should only exist on the map.
+- **Frame themes** — choose in the config how the map is dressed: the aged parchment scroll, or a **sci-fi holo-tablet** (gunmetal corner brackets, teal hologram tint, scanlines) rendered from a CC-licensed 3D model. Themes apply to the window and the scene overlay alike.
 - **Sensible fallbacks** — with nothing configured, the map shows the currently viewed scene centred on each user's own character.
 - **System-agnostic** — works with any game system.
 
@@ -48,3 +52,5 @@ https://github.com/nscarpinatodev/scorpious187s-parchment-map/releases/latest/do
 ## Credits
 
 Parchment texture: [Old parchment paper with a rough surface](https://www.vecteezy.com/) via Vecteezy.
+
+Sci-fi tablet frame: this work is based on "Low Poly Sci-Fi Tablet" (https://sketchfab.com/3d-models/low-poly-sci-fi-tablet-ee1fde7ec1514fd5a61790809ebd46a6) by Snooze (https://sketchfab.com/Snooze) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/).

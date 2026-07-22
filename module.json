@@ -1,8 +1,8 @@
 {
 	"id": "scorpious187s-parchment-map",
-	"title": "Scorpious187's Parchment Map",
-	"description": "Opens a map view styled as a rolled-up parchment scroll. A GM-configured scene is displayed with an aged-ink parchment treatment, centred on a chosen actor's token, with pan and zoom.",
-	"version": "14.2.0",
+	"title": "Scorpious187's In-Game Maps",
+	"description": "Displays a scene as an in-game map inside a themed frame — an aged parchment scroll or a sci-fi holo-tablet — centred on a chosen actor's token, with pan and zoom, as a window or pinned into a scene like a tile.",
+	"version": "14.6.0",
 	"compatibility": {
 		"minimum": "13",
 		"verified": "14"
@@ -27,5 +27,5 @@
 	],
 	"url": "https://github.com/nscarpinatodev/scorpious187s-parchment-map",
 	"manifest": "https://github.com/nscarpinatodev/scorpious187s-parchment-map/releases/latest/download/module.json",
-	"download": "https://github.com/nscarpinatodev/scorpious187s-parchment-map/releases/download/v14.2.0/module.zip"
+	"download": "https://github.com/nscarpinatodev/scorpious187s-parchment-map/releases/download/v14.6.0/module.zip"
 }

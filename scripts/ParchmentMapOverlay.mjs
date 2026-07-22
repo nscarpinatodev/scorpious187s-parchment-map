@@ -1,5 +1,5 @@
 import { MODULE_ID } from "./constants.mjs";
-import { FRAME_ASPECT, layoutMapViewport, prepareMapContext } from "./map-data.mjs";
+import { frameHeight, layoutMapViewport, prepareMapContext } from "./map-data.mjs";
 
 /**
  * The Parchment Map as a static scene overlay: the same aged-map treatment
@@ -49,7 +49,7 @@ export class ParchmentMapOverlay {
 		const { x, y } = canvas.stage.pivot;
 		await scene.setFlag(MODULE_ID, "overlay", {
 			x: Math.round(x - width / 2),
-			y: Math.round(y - (width * FRAME_ASPECT) / 2),
+			y: Math.round(y - frameHeight(width, false) / 2),
 			width,
 			landscape: false,
 		});
@@ -75,8 +75,7 @@ export class ParchmentMapOverlay {
 		const hud = this.#hud;
 		if (!placement || !hud) return;
 
-		const context = prepareMapContext();
-		context.landscape = !!placement.landscape;
+		const context = prepareMapContext({ landscape: placement.landscape });
 		const html = await foundry.applications.handlebars.renderTemplate(
 			`modules/${MODULE_ID}/templates/parchment-map.hbs`, context,
 		);
@@ -98,7 +97,7 @@ export class ParchmentMapOverlay {
 		el.style.left = `${x}px`;
 		el.style.top = `${y}px`;
 		el.style.width = `${width}px`;
-		el.style.height = `${landscape ? width / FRAME_ASPECT : width * FRAME_ASPECT}px`;
+		el.style.height = `${frameHeight(width, landscape)}px`;
 	}
 
 	/* -------------------------------------------- */
