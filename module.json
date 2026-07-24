@@ -2,7 +2,7 @@
 	"id": "scorpious187s-parchment-map",
 	"title": "Scorpious187's In-Game Maps",
 	"description": "Displays a scene as an in-game map inside a themed frame — an aged parchment scroll or a sci-fi holo-tablet — centred on a chosen actor's token, with pan and zoom, as a window or pinned into a scene like a tile.",
-	"version": "15.0.0-dev.3",
+	"version": "15.0.0-dev.10",
 	"compatibility": {
 		"minimum": "13",
 		"verified": "14"

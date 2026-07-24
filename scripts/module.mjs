@@ -45,6 +45,7 @@ Hooks.once("init", () => {
 		// v15 canvas render engine (experimental / WIP)
 		placeCanvasMap: () => ParchmentMapCanvas.place(),
 		removeCanvasMap: () => ParchmentMapCanvas.remove(),
+		rotateCanvasMap: () => ParchmentMapCanvas.rotate(),
 	};
 });
 
@@ -74,7 +75,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
 			order: Object.keys(tiles.tools).length,
 			onChange: () => ParchmentMapOverlay.toggle(),
 		};
-		// v15 canvas render engine (experimental): place a real map Tile.
+		// v15 canvas render engine (experimental): place / rotate a real map Tile.
 		tiles.tools.parchmentMapCanvas = {
 			name: "parchmentMapCanvas",
 			title: "SCORPPARCH.CanvasTool",
@@ -82,6 +83,14 @@ Hooks.on("getSceneControlButtons", (controls) => {
 			button: true,
 			order: Object.keys(tiles.tools).length + 1,
 			onChange: () => ParchmentMapCanvas.place(),
+		};
+		tiles.tools.parchmentMapCanvasRotate = {
+			name: "parchmentMapCanvasRotate",
+			title: "SCORPPARCH.CanvasRotateTool",
+			icon: "fas fa-rotate-right",
+			button: true,
+			order: Object.keys(tiles.tools).length + 2,
+			onChange: () => ParchmentMapCanvas.rotate(),
 		};
 	}
 });
