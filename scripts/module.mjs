@@ -109,9 +109,16 @@ Hooks.on("renderTileConfig", (app, html) => {
 			<input type="checkbox" name="${flagName}" ${checked} />
 		</div>
 		<p class="hint">${game.i18n.localize("SCORPPARCH.TileShowOnMapHint")}</p>`;
-	const anchor = element.querySelector("footer, .form-footer");
-	if (anchor) anchor.before(group);
-	else element.querySelector("form")?.appendChild(group);
+	// v13+ TileConfig is tabbed and its footer sits outside the tab panes, so
+	// anchoring on the footer makes the checkbox show on every tab. Inject into
+	// the Appearance pane instead; fall back to the form end on older layouts.
+	const tab = element.querySelector('.tab[data-tab="appearance"]');
+	if (tab) tab.appendChild(group);
+	else {
+		const anchor = element.querySelector("footer, .form-footer");
+		if (anchor) anchor.before(group);
+		else element.querySelector("form")?.appendChild(group);
+	}
 	app.setPosition?.({ height: "auto" });
 });
 
