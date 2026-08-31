@@ -66,6 +66,18 @@ export function resolveSrc(path) {
 	return /^https?:|^data:/i.test(path) ? path : foundry.utils.getRoute(path);
 }
 
+/**
+ * A scene's background image src. v14 moved this to `Level#background`; the old
+ * `Scene#background` getter still works but logs a deprecation warning, so read
+ * the level directly on v14 and fall back to the legacy getter on v13.
+ */
+export function sceneBackground(scene) {
+	if (!scene) return null;
+	const level = scene.firstLevel;
+	if (level) return level.background?.src ?? null;
+	return scene.background?.src ?? scene.img ?? null;
+}
+
 /** Fraction (0..1) of a token document's centre within the scene rect. */
 export function tokenCenter(scene, token) {
 	if (!token) return { fx: 0.5, fy: 0.5, hasToken: false };
@@ -106,7 +118,7 @@ export function prepareMapContext({ landscape = false } = {}) {
 	context.scrollStyle = style.join(";");
 
 	const scene = resolveScene();
-	const bg = scene?.background?.src ?? scene?.img ?? null;
+	const bg = sceneBackground(scene);
 	if (!scene || !bg) {
 		context.available = false;
 		return context;

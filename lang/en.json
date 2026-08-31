@@ -2,6 +2,8 @@
 	"SCORPPARCH.WindowTitle": "Parchment Map",
 	"SCORPPARCH.OpenTool": "Open Parchment Map",
 	"SCORPPARCH.OverlayTool": "Place/Remove Parchment Map Overlay",
+	"SCORPPARCH.CanvasTool": "Place In-Game Map Tile (experimental)",
+	"SCORPPARCH.CanvasRotateTool": "Rotate In-Game Map Tile 90° (experimental)",
 	"SCORPPARCH.Overlay.Move": "Drag to move the map overlay",
 	"SCORPPARCH.Overlay.Resize": "Drag to resize the map overlay",
 	"SCORPPARCH.Overlay.Rotate": "Rotate the map overlay between portrait and landscape",
